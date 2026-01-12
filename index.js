@@ -1,7 +1,8 @@
 const express = require("express");
 const fs = require("fs");
-const app = express();
+const path = require("path");
 
+const app = express();
 app.use(express.urlencoded({ extended: true }));
 
 // قراءة CSV
@@ -12,22 +13,28 @@ rows.slice(1).forEach(r => {
   data[id.trim()] = pdf.trim();
 });
 
+// الصفحة الرئيسية
 app.get("/", (req, res) => {
   res.send(`
-    <h3>أدخل رقم الهوية</h3>
+    <h2>عرض الجدول</h2>
     <form method="POST">
-      <input name="id" required />
-      <button>عرض الجدول</button>
+      <input name="id" placeholder="رقم الهوية" required />
+      <button type="submit">عرض الجدول</button>
     </form>
   `);
 });
 
+// استقبال الهوية
 app.post("/", (req, res) => {
   const pdf = data[req.body.id];
-  if (!pdf) return res.send("رقم الهوية غير صحيح");
-  res.sendFile(__dirname + "/" + pdf + ".pdf");
+  if (!pdf) {
+    return res.send("<h3>رقم الهوية غير صحيح</h3>");
+  }
+  res.sendFile(path.join(__dirname, pdf + ".pdf"));
 });
 
-app.listen(3000, () => {
-  console.log("Server running on http://localhost:3000");
+// تشغيل السيرفر
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log("Server running on port " + PORT);
 });
